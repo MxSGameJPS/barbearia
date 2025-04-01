@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { carrinhoStorage } from "@/utils/localStorage";
 
 // Componente Cliente sem SSR
 const ProdutosClient = () => {
@@ -77,75 +78,21 @@ const ProdutosClient = () => {
     if (!produto) return;
 
     try {
-      // Se em desenvolvimento local, podemos simular o comportamento
-      if (window.location.hostname === "localhost") {
-        // Simular comportamento com localStorage
-        try {
-          // Buscar carrinho atual
-          const carrinhoString = localStorage.getItem("carrinho");
-          const carrinho = carrinhoString
-            ? JSON.parse(carrinhoString)
-            : { itens: [] };
-
-          // Verificar se o produto já está no carrinho
-          const itemExistente = carrinho.itens.find(
-            (item: { produtoId: string }) => item.produtoId === produtoId
-          );
-
-          if (itemExistente) {
-            itemExistente.quantidade += 1;
-          } else {
-            carrinho.itens.push({
-              produtoId,
-              nome: produto.nome,
-              preco: produto.preco,
-              imagem: produto.imagem,
-              quantidade: 1,
-            });
-          }
-
-          // Atualizar carrinho no localStorage
-          localStorage.setItem("carrinho", JSON.stringify(carrinho));
-
-          // Mostrar mensagem de sucesso
-          setCartMessage({
-            type: "success",
-            message: "Produto adicionado ao carrinho!",
-            productId: produtoId,
-          });
-
-          // Limpar mensagem após 3 segundos
-          setTimeout(() => {
-            setCartMessage(null);
-          }, 3000);
-
-          return; // Sair da função se o processo local foi bem-sucedido
-        } catch (localError) {
-          console.error("Erro ao salvar no localStorage:", localError);
-          // Se falhar localmente, continuamos para tentar a API
-        }
-      }
-
-      // Caso não seja localhost ou falhe o localStorage, tenta API
-      const response = await fetch("/api/carrinho", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ produtoId, quantidade: 1 }),
+      // Tentativa de adicionar ao carrinho usando carrinhoStorage
+      carrinhoStorage.addItem({
+        produtoId: produto.id,
+        nome: produto.nome,
+        preco: produto.preco,
+        quantidade: 1,
+        imagem: produto.imagem,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setCartMessage({
-          type: "success",
-          message: "Produto adicionado ao carrinho!",
-          productId: produtoId,
-        });
-      } else {
-        throw new Error(data.error || "Erro ao adicionar ao carrinho");
-      }
+      // Mostrar mensagem de sucesso
+      setCartMessage({
+        type: "success",
+        message: "Produto adicionado ao carrinho!",
+        productId: produtoId,
+      });
     } catch (error) {
       console.error("Erro ao adicionar ao carrinho:", error);
       setCartMessage({
@@ -286,4 +233,11 @@ const ProdutosClient = () => {
 // Exportação do componente com carregamento dinâmico e sem SSR
 export default dynamic(() => Promise.resolve(ProdutosClient), {
   ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-grow flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    </div>
+  ),
 });

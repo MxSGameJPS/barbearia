@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { agendamentoStorage } from "@/utils/localStorage";
 
 // Componente Cliente sem SSR
 const AgendamentoClient = () => {
@@ -127,120 +128,50 @@ const AgendamentoClient = () => {
     setFormError("");
 
     try {
-      // Verifica se está montado e se o localStorage está disponível
-      if (!mounted || typeof window === "undefined" || !window.localStorage) {
-        throw new Error("Armazenamento local não disponível");
+      // Verificar se está montado
+      if (!mounted) {
+        throw new Error("Componente não está montado");
       }
 
-      // Se for desenvolvimento local, podemos salvar diretamente no localStorage
-      if (window.location.hostname === "localhost") {
-        // Simular salvamento local para ambiente de desenvolvimento
-        try {
-          // Criar um novo agendamento manualmente
-          const newAgendamento = {
-            id: String(Date.now()),
-            ...formData,
-            status: "pendente",
-            createdAt: new Date().toISOString(),
-          };
-
-          // Buscar agendamentos existentes
-          const existingData = localStorage.getItem("agendamentos");
-          const agendamentos = existingData ? JSON.parse(existingData) : [];
-
-          // Adicionar novo agendamento
-          agendamentos.push(newAgendamento);
-
-          // Salvar de volta no localStorage
-          localStorage.setItem("agendamentos", JSON.stringify(agendamentos));
-
-          // Continuar com o fluxo de sucesso
-          setSuccess(true);
-          setFormData({
-            nome: "",
-            email: "",
-            telefone: "",
-            data: "",
-            hora: "",
-            servico: "",
-            observacoes: "",
-          });
-
-          setTimeout(() => {
-            router.push("/");
-          }, 3000);
-
-          return; // Sair da função se salvo com sucesso
-        } catch (localError) {
-          console.error("Falha ao salvar localmente:", localError);
-          // Se falhar localmente, continuamos para tentar a API
-        }
-      }
-
-      // Se não for desenvolvimento local ou falhar, tentamos a API normal
-      const response = await fetch("/api/agendamento", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      // Verificar se o fetch foi concluído corretamente
-      if (!response) {
-        throw new Error("Falha na conexão com o servidor");
-      }
-
-      let data;
+      // Criar novo agendamento
       try {
-        data = await response.json();
-      } catch (parseError) {
-        console.error("Erro ao processar resposta:", parseError);
-        throw new Error("Erro ao processar resposta do servidor");
+        // Usar o helper de storage para salvar o agendamento
+        agendamentoStorage.save({
+          nome: formData.nome,
+          email: formData.email,
+          telefone: formData.telefone,
+          data: formData.data,
+          hora: formData.hora,
+          servico: formData.servico,
+          observacoes: formData.observacoes,
+        });
+
+        // Sucesso
+        setSuccess(true);
+        setFormData({
+          nome: "",
+          email: "",
+          telefone: "",
+          data: "",
+          hora: "",
+          servico: "",
+          observacoes: "",
+        });
+
+        setTimeout(() => {
+          router.push("/");
+        }, 3000);
+      } catch (storageError) {
+        console.error("Erro ao salvar agendamento:", storageError);
+        throw new Error("Não foi possível salvar o agendamento");
       }
-
-      if (!response.ok) {
-        const errorMessage = data?.error || "Erro ao processar agendamento";
-        console.error("Erro na resposta:", errorMessage);
-        throw new Error(errorMessage);
-      }
-
-      setSuccess(true);
-
-      // Limpar formulário após envio bem-sucedido
-      setFormData({
-        nome: "",
-        email: "",
-        telefone: "",
-        data: "",
-        hora: "",
-        servico: "",
-        observacoes: "",
-      });
-
-      // Redirecionar após 3 segundos
-      setTimeout(() => {
-        router.push("/");
-      }, 3000);
     } catch (error) {
-      console.error("Erro detalhado ao agendar:", error);
-
-      // Mensagem mais informativa com base no erro
-      let errorMessage = "Ocorreu um erro ao processar seu agendamento";
-
-      if (error instanceof Error) {
-        if (error.message.includes("localStorage")) {
-          errorMessage =
-            "Não foi possível salvar seu agendamento no navegador. Verifique se o armazenamento local está habilitado.";
-        } else if (error.message.includes("conexão")) {
-          errorMessage =
-            "Falha na conexão com o servidor. Verifique sua internet e tente novamente.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-
-      setFormError(errorMessage);
+      console.error("Erro no agendamento:", error);
+      setFormError(
+        error instanceof Error
+          ? error.message
+          : "Ocorreu um erro ao processar o agendamento. Tente novamente."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -560,4 +491,11 @@ const AgendamentoClient = () => {
 // Exportação do componente com carregamento dinâmico e sem SSR
 export default dynamic(() => Promise.resolve(AgendamentoClient), {
   ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-grow flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    </div>
+  ),
 });

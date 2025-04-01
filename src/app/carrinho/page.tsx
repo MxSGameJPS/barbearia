@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { carrinhoStorage } from "@/utils/localStorage";
 
 // Interfaces para tipagem
 interface Item {
@@ -38,46 +39,20 @@ const CarrinhoClient = () => {
     }
   }, [mounted]);
 
-  const fetchCarrinho = async () => {
+  const fetchCarrinho = useCallback(async () => {
+    if (!mounted) return;
+
     setLoading(true);
-    setError("");
-
     try {
-      // Se estiver em desenvolvimento local, buscar do localStorage
-      if (window.location.hostname === "localhost") {
-        // Simular busca do localStorage
-        const carrinhoString = localStorage.getItem("carrinho");
-        if (carrinhoString) {
-          const data = JSON.parse(carrinhoString);
-          setCarrinho(data);
-        } else {
-          setCarrinho({ itens: [] });
-        }
-        setLoading(false);
-        return;
-      }
-
-      // Caso contrário, buscar da API
-      const response = await fetch("/api/carrinho", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Falha ao buscar o carrinho");
-      }
-
-      const data = await response.json();
-      setCarrinho(data);
+      const items = carrinhoStorage.getItems();
+      setCarrinho({ itens: items });
     } catch (error) {
       console.error("Erro ao buscar carrinho:", error);
-      setError("Não foi possível carregar seu carrinho. Tente novamente.");
+      setError("Não foi possível carregar os itens do carrinho.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [mounted]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -93,49 +68,21 @@ const CarrinhoClient = () => {
     if (novaQuantidade < 1) return;
 
     try {
-      // Se estiver em desenvolvimento local, atualizar no localStorage
-      if (window.location.hostname === "localhost") {
-        // Buscar carrinho atual
-        const carrinhoString = localStorage.getItem("carrinho");
-        if (carrinhoString) {
-          const carrinhoData = JSON.parse(carrinhoString);
-          // Atualizar quantidade do item
-          const itemIndex = carrinhoData.itens.findIndex(
-            (item: Item) => item.produtoId === produtoId
-          );
-          if (itemIndex !== -1) {
-            carrinhoData.itens[itemIndex].quantidade = novaQuantidade;
-            // Salvar carrinho atualizado
-            localStorage.setItem("carrinho", JSON.stringify(carrinhoData));
-            // Atualizar estado
-            setCarrinho(carrinhoData);
-          }
-        }
-        return;
-      }
+      // Encontrar o item no carrinho
+      const item = carrinho.itens.find((item) => item.produtoId === produtoId);
+      if (!item) return;
 
-      // Caso contrário, atualizar na API
-      const response = await fetch(`/api/carrinho`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ produtoId, quantidade: novaQuantidade }),
-      });
+      // Atualizar a quantidade
+      carrinhoStorage.updateItem(produtoId, novaQuantidade);
 
-      if (!response.ok) {
-        throw new Error("Falha ao atualizar quantidade");
-      }
-
-      // Atualizar o estado local sem fazer nova requisição
-      setCarrinho((prevCarrinho) => ({
-        ...prevCarrinho,
-        itens: prevCarrinho.itens.map((item) =>
+      // Atualizar o estado local
+      setCarrinho({
+        itens: carrinho.itens.map((item) =>
           item.produtoId === produtoId
             ? { ...item, quantidade: novaQuantidade }
             : item
         ),
-      }));
+      });
     } catch (error) {
       console.error("Erro ao atualizar quantidade:", error);
       setError("Não foi possível atualizar a quantidade. Tente novamente.");
@@ -144,44 +91,13 @@ const CarrinhoClient = () => {
 
   const handleRemoveItem = async (produtoId: string) => {
     try {
-      // Se estiver em desenvolvimento local, remover do localStorage
-      if (window.location.hostname === "localhost") {
-        // Buscar carrinho atual
-        const carrinhoString = localStorage.getItem("carrinho");
-        if (carrinhoString) {
-          const carrinhoData = JSON.parse(carrinhoString);
-          // Remover item
-          carrinhoData.itens = carrinhoData.itens.filter(
-            (item: Item) => item.produtoId !== produtoId
-          );
-          // Salvar carrinho atualizado
-          localStorage.setItem("carrinho", JSON.stringify(carrinhoData));
-          // Atualizar estado
-          setCarrinho(carrinhoData);
-        }
-        return;
-      }
+      // Remover o item do carrinho
+      carrinhoStorage.removeItem(produtoId);
 
-      // Caso contrário, remover pela API
-      const response = await fetch(`/api/carrinho`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ produtoId }),
+      // Atualizar o estado local
+      setCarrinho({
+        itens: carrinho.itens.filter((item) => item.produtoId !== produtoId),
       });
-
-      if (!response.ok) {
-        throw new Error("Falha ao remover item");
-      }
-
-      // Atualizar o estado local sem fazer nova requisição
-      setCarrinho((prevCarrinho) => ({
-        ...prevCarrinho,
-        itens: prevCarrinho.itens.filter(
-          (item) => item.produtoId !== produtoId
-        ),
-      }));
     } catch (error) {
       console.error("Erro ao remover item:", error);
       setError("Não foi possível remover o item. Tente novamente.");
@@ -190,22 +106,8 @@ const CarrinhoClient = () => {
 
   const handleClearCart = async () => {
     try {
-      // Se estiver em desenvolvimento local, limpar o localStorage
-      if (window.location.hostname === "localhost") {
-        localStorage.setItem("carrinho", JSON.stringify({ itens: [] }));
-        setCarrinho({ itens: [] });
-        return;
-      }
-
-      // Caso contrário, limpar pela API
-      const response = await fetch(`/api/carrinho/limpar`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("Falha ao limpar carrinho");
-      }
-
+      // Limpar o carrinho
+      carrinhoStorage.clear();
       setCarrinho({ itens: [] });
     } catch (error) {
       console.error("Erro ao limpar carrinho:", error);
@@ -508,4 +410,11 @@ const CarrinhoClient = () => {
 // Exportação do componente com carregamento dinâmico e sem SSR
 export default dynamic(() => Promise.resolve(CarrinhoClient), {
   ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-grow flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    </div>
+  ),
 });

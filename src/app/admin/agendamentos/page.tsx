@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import AdminHeader from "@/components/AdminHeader";
+import { agendamentoStorage } from "@/utils/localStorage";
 
 // Definindo a interface para tipagem
 interface Agendamento {
@@ -42,41 +43,9 @@ const AdminAgendamentosClient = () => {
     setError("");
 
     try {
-      // Verificar se estamos no ambiente de desenvolvimento (localhost)
-      if (window.location.hostname === "localhost") {
-        // Buscar dados do localStorage
-        const storedAgendamentos = localStorage.getItem("agendamentos");
-        if (storedAgendamentos) {
-          const parsedAgendamentos = JSON.parse(storedAgendamentos);
-          setAgendamentos(parsedAgendamentos);
-        } else {
-          setAgendamentos([]);
-        }
-        setLoading(false);
-        return;
-      }
-
-      // Ambiente de produção - buscar da API
-      const token = localStorage.getItem("adminToken");
-
-      if (!token) {
-        setError("Não autorizado. Faça login para continuar.");
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch("/api/admin/agendamentos", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Falha ao buscar agendamentos");
-      }
-
-      const data = await response.json();
-      setAgendamentos(data);
+      // Buscar agendamentos usando o helper de storage
+      const agendamentos = agendamentoStorage.getAll();
+      setAgendamentos(agendamentos);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
       setError("Falha ao carregar os agendamentos. Tente novamente.");
@@ -99,7 +68,7 @@ const AdminAgendamentosClient = () => {
 
   const updateAgendamentoStatus = async (
     agendamentoId: string,
-    novoStatus: string
+    novoStatus: Agendamento["status"]
   ) => {
     if (!mounted) return;
 
@@ -110,77 +79,38 @@ const AdminAgendamentosClient = () => {
     });
 
     try {
-      // Verificar se estamos no ambiente de desenvolvimento (localhost)
-      if (window.location.hostname === "localhost") {
-        // Atualizar no localStorage
-        const storedAgendamentos = localStorage.getItem("agendamentos");
-        if (storedAgendamentos) {
-          const parsedAgendamentos = JSON.parse(storedAgendamentos);
-          const updatedAgendamentos = parsedAgendamentos.map(
-            (agendamento: Agendamento) => {
-              if (agendamento.id === agendamentoId) {
-                return {
-                  ...agendamento,
-                  status: novoStatus,
-                };
-              }
-              return agendamento;
-            }
-          );
+      // Atualizar status usando o helper de storage
+      const agendamento = agendamentoStorage.getById(agendamentoId);
 
-          // Salvar de volta no localStorage
-          localStorage.setItem(
-            "agendamentos",
-            JSON.stringify(updatedAgendamentos)
-          );
-
-          // Atualizar estado
-          setAgendamentos(updatedAgendamentos);
-        }
-
-        setUpdateStatus({
-          agendamentoId: null,
-          loading: false,
-          error: "",
-        });
-        return;
+      if (!agendamento) {
+        throw new Error("Agendamento não encontrado");
       }
 
-      // Ambiente de produção - atualizar via API
-      const token = localStorage.getItem("adminToken");
+      const updatedAgendamento: Agendamento = {
+        ...agendamento,
+        status: novoStatus,
+      };
 
-      if (!token) {
-        throw new Error("Não autorizado. Faça login para continuar.");
-      }
+      agendamentoStorage.update(agendamentoId, updatedAgendamento);
 
-      const response = await fetch(`/api/admin/agendamentos/${agendamentoId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: novoStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Falha ao atualizar o status");
-      }
-
-      // Atualizar o estado local
-      setAgendamentos((prev) =>
-        prev.map((agendamento) =>
-          agendamento.id === agendamentoId
-            ? { ...agendamento, status: novoStatus as Agendamento["status"] }
-            : agendamento
+      // Atualizar estado local
+      setAgendamentos((prevAgendamentos) =>
+        prevAgendamentos.map((ag) =>
+          ag.id === agendamentoId ? updatedAgendamento : ag
         )
       );
+
+      setUpdateStatus({
+        agendamentoId: null,
+        loading: false,
+        error: "",
+      });
     } catch (error) {
       console.error("Erro ao atualizar status:", error);
       setUpdateStatus({
         agendamentoId,
         loading: false,
-        error:
-          error instanceof Error ? error.message : "Erro ao atualizar status",
+        error: "Falha ao atualizar status. Tente novamente.",
       });
     }
   };
@@ -406,6 +336,14 @@ const AdminAgendamentosClient = () => {
 };
 
 // Exportação do componente com carregamento dinâmico e sem SSR
+// Usamos o "default" como uma string para evitar problemas com o Webpack/Turbopack
 export default dynamic(() => Promise.resolve(AdminAgendamentosClient), {
   ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="mt-8 flex justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    </div>
+  ),
 });

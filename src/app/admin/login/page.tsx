@@ -15,7 +15,7 @@ export default function AdminLogin() {
 
   // Credenciais padrão
   const ADMIN_USERNAME = "admin";
-  const ADMIN_PASSWORD = "barbeiro123";
+  const ADMIN_PASSWORD = "admin123";
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -132,7 +132,7 @@ export default function AdminLogin() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Credenciais padrão: admin / barbeiro123
+              Credenciais padrão: admin / admin123
             </p>
           </div>
         </div>

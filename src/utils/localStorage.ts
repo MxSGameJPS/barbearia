@@ -11,7 +11,7 @@ export interface Agendamento {
   hora: string;
   servico: string;
   observacoes?: string;
-  status: "pendente" | "confirmado" | "cancelado";
+  status: "pendente" | "confirmado" | "cancelado" | "concluido";
   createdAt: string;
 }
 
@@ -53,7 +53,11 @@ export interface Pedido {
 }
 
 // Função para garantir que o localStorage só seja acessado no lado do cliente
-const isClient = () => typeof window !== "undefined";
+const isClient = () => {
+  return (
+    typeof window !== "undefined" && typeof window.localStorage !== "undefined"
+  );
+};
 
 // CRUD para Agendamentos
 export const agendamentoStorage = {
