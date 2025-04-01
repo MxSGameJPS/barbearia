@@ -89,7 +89,7 @@ const ProdutosClient = () => {
 
           // Verificar se o produto já está no carrinho
           const itemExistente = carrinho.itens.find(
-            (item: any) => item.produtoId === produtoId
+            (item: { produtoId: string }) => item.produtoId === produtoId
           );
 
           if (itemExistente) {

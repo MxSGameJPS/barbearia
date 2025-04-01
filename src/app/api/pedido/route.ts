@@ -57,16 +57,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("Erro ao processar pedido:", error);
-
-    if (error instanceof Error && error.message === "Carrinho vazio") {
-      return NextResponse.json(
-        { error: "O carrinho está vazio" },
-        { status: 400 }
-      );
-    }
-
+  } catch (_) {
     return NextResponse.json(
       { error: "Erro ao processar pedido" },
       { status: 500 }

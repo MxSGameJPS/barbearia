@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { agendamentoStorage } from "@/utils/localStorage";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Usando try-catch para lidar com erros de localStorage do lado do servidor
     if (typeof window === "undefined") {

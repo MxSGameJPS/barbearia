@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
       if (!authData.isAuthenticated) {
         return NextResponse.redirect(new URL("/admin/login", request.url));
       }
-    } catch (error) {
+    } catch (_) {
       // Se houver erro na análise do cookie, redirecionar para o login
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }

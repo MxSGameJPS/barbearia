@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import AdminHeader from "@/components/AdminHeader";
 
@@ -34,15 +34,8 @@ const AdminAgendamentosClient = () => {
     error: "",
   });
 
-  // Garantir que o componente está montado no cliente
-  useEffect(() => {
-    setMounted(true);
-    if (mounted) {
-      fetchAgendamentos();
-    }
-  }, [mounted]);
-
-  const fetchAgendamentos = async () => {
+  // Definir fetchAgendamentos com useCallback para evitar dependência cíclica
+  const fetchAgendamentos = useCallback(async () => {
     if (!mounted) return;
 
     setLoading(true);
@@ -90,7 +83,19 @@ const AdminAgendamentosClient = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mounted]);
+
+  // Garantir que o componente está montado no cliente
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Carregar agendamentos quando o componente estiver montado
+  useEffect(() => {
+    if (mounted) {
+      fetchAgendamentos();
+    }
+  }, [mounted, fetchAgendamentos]);
 
   const updateAgendamentoStatus = async (
     agendamentoId: string,
