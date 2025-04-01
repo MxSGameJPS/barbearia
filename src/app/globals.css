@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --primary: #8b4513;
+  --secondary: #d2b48c;
+  --accent: #a0522d;
+  --brown-dark: #5d4037;
+  --gray-light: #f5f5f5;
+  --section-title: #000000;
+  --text-light: #171717;
+  --placeholder: rgb(3, 3, 3);
+  --text-gray: #141414;
+  --text-muted: #050505;
+  --input-text: #000000;
+  --label-text: #000000;
+  --card-text: #000000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-poppins);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --primary: #8b4513;
+    --secondary: #d2b48c;
+    --accent: #a0522d;
+    --brown-dark: #5d4037;
+    --gray-light: #f5f5f5;
+    --section-title: #d6d6d6;
+    --text-light: #171717;
+    --placeholder: rgb(94, 94, 94);
+    --text-gray: #141414;
+    --text-muted: #050505;
+    --input-text: #000000;
+    --label-text: #000000;
+    --card-text: #000000;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, sans-serif;
+}
+
+h1 {
+  color: #ffffff;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--foreground);
+  font-weight: bold;
+}
+
+.text-gray-400,
+.text-gray-500,
+.text-gray-600 {
+  color: rgb(0, 0, 0) !important;
+}
+
+.text-gray-700,
+.text-gray-800,
+.text-gray-900 {
+  color: var(--foreground) !important;
+}
+
+.section-title {
+  color: var(--section-title);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  text-align: center;
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+input,
+textarea,
+select,
+option {
+  color: var(--input-text);
+  font-weight: 500;
+}
+
+label,
+.form-label {
+  color: var(--label-text) !important;
+  font-weight: 600 !important;
+}
+
+.text-high-contrast {
+  color: var(--foreground) !important;
+  font-weight: 500;
+}
+
+.text-medium-contrast {
+  color: var(--text-light) !important;
+  font-weight: 500;
+}
+
+.card-text {
+  color: var(--card-text) !important;
+}
+
+table th {
+  color: var(--foreground) !important;
+  font-weight: 600 !important;
+}
+
+table td {
+  color: var(--foreground) !important;
+}
+
+button,
+.btn {
+  font-weight: 600;
+}
+
+a {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
