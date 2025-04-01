@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💈 Barbearia Pavanello
 
-## Getting Started
+<p align="center">
+  <img src="./public/print.png" alt="Screenshot do Projeto Barbearia Pavanello" width="800px">
+</p>
 
-First, run the development server:
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15.2.4-black?style=for-the-badge&logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-19.0.0-blue?style=for-the-badge&logo=react" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS">
+</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 📋 Sobre o Projeto
+
+Sistema web completo para gerenciamento de barbearia, permitindo o agendamento de serviços, venda de produtos e administração completa do negócio.
+
+### ✨ Funcionalidades
+
+#### 🧑‍💼 Área do Cliente
+
+- **Agendamento online** de serviços de barbearia
+- **Compra de produtos** com carrinho de compras
+- **Visualização de serviços** disponíveis
+- **Formulário de contato** para dúvidas e informações
+
+#### 👨‍💻 Área Administrativa
+
+- **Dashboard** com resumo dos principais indicadores
+- **Gerenciamento de agendamentos** (aprovar, rejeitar, concluir)
+- **Controle de estoque** de produtos
+- **Gestão financeira** e controle de caixa
+- **Relatórios** de vendas e serviços
+- **Cadastro de fornecedores**
+
+## 🚀 Tecnologias
+
+- **Next.js 15**: Framework React com renderização híbrida
+- **React 19**: Biblioteca para construção de interfaces
+- **TypeScript**: Superset JavaScript tipado
+- **Tailwind CSS 4**: Framework CSS utilitário
+- **React Icons**: Biblioteca de ícones para React
+- **Cookies Next**: Gerenciamento de cookies
+
+## 🛠️ Como executar
+
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/seu-usuario/barbearia-pavanello.git
+   cd barbearia-pavanello
+   ```
+
+2. Instale as dependências:
+
+   ```bash
+   npm install
+   ```
+
+3. Execute em desenvolvimento:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Para build de produção:
+   ```bash
+   npm run build
+   npm start
+   ```
+
+## 📂 Estrutura do Projeto
+
+```
+barbearia-next/
+├── public/           # Arquivos estáticos
+│   ├── images/       # Imagens do site
+│   └── produtos/     # Imagens de produtos
+├── src/
+│   ├── app/          # Rotas e páginas (App Router)
+│   │   ├── admin/    # Painel administrativo
+│   │   ├── api/      # Rotas de API
+│   │   └── ...       # Demais páginas
+│   ├── components/   # Componentes reutilizáveis
+│   └── utils/        # Funções utilitárias
+└── ...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 💡 Melhorias Implementadas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Design Responsivo**: Interface adaptável para dispositivos móveis, tablets e desktops
+- **Autenticação de Usuários**: Sistema de login para acessar área administrativa
+- **Armazenamento Local**: Persistência de dados para ambiente de desenvolvimento
+- **UI/UX Aprimorada**: Interface moderna e de fácil navegação
+- **Gerenciamento de Estado**: Sistema eficiente de controle de estado dos componentes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 👨‍💻 Autor
 
-## Learn More
+Desenvolvido por Saulo Pavanello
 
-To learn more about Next.js, take a look at the following resources:
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Saulo_Pavanello-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/saulopavanello/)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<p align="center">
+  <i>Este projeto foi desenvolvido com 🖤 e ☕</i>
+</p>
